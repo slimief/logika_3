@@ -1,0 +1,119 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <iostream>
+#include <string.h>
+#include <locale.h>
+
+struct node {
+    char inf[256];
+    struct node* next;
+};
+
+struct node* head = NULL, * last = NULL;
+
+struct node* get_struct(void);
+void enqueue(void);
+char* dequeue(void);
+void review(void);
+int is_empty(void);
+
+struct node* get_struct(void) {
+    struct node* p = NULL;
+
+    if ((p = (struct node*)malloc(sizeof(struct node))) == NULL) {
+        printf("Ошибка при распределении памяти\n");
+        exit(1);
+    }
+
+    printf("Введите название объекта: \n");
+    scanf("%s", p->inf);
+
+    p->next = NULL;
+    return p;
+}
+
+/* Добавление элемента в конец очереди */
+void enqueue(void) {
+    struct node* p = get_struct();
+
+    if (head == NULL) { // Если очередь пуста
+        head = p;       // Устанавливаем голову
+        last = p;       // Устанавливаем конец
+    }
+    else {            // Если очередь не пуста
+        last->next = p; // Добавляем в конец
+        last = p;       // Обновляем указатель на конец
+    }
+}
+
+/* Извлечение элемента из начала очереди */
+char* dequeue(void) {
+    if (head == NULL) { // Если очередь пуста
+        printf("Очередь пуста\n");
+        return NULL;
+    }
+
+    struct node* temp = head;  // Сохраняем элемент на удаление
+    char* data = _strdup(temp->inf); // Копируем данные для возврата
+    head = head->next;        // Обновляем голову очереди
+    free(temp);               // Освобождаем память
+    return data;              // Возвращаем данные
+}
+
+/* Просмотр содержимого очереди */
+void review(void) {
+    struct node* struc = head;
+    if (head == NULL) {
+        printf("Очередь пуста\n");
+        return;
+    }
+    while (struc) {
+        printf("Имя - %s\n", struc->inf);
+        struc = struc->next;
+    }
+}
+
+/* Проверка, пуста ли очередь */
+int is_empty(void) {
+    return head == NULL;
+}
+
+/* Пример использования очереди */
+int main() {
+    setlocale(LC_ALL, "Russian");
+    int choice;
+    char* data;
+
+    while (1) {
+        printf("1. Добавить элемент в очередь\n");
+        printf("2. Извлечь элемент из очереди\n");
+        printf("3. Просмотр очереди\n");
+        printf("4. Выход\n");
+        printf("Выберите действие: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            enqueue();
+            break;
+        case 2:
+            data = dequeue();
+            if (data) {
+                printf("Извлеченный элемент: %s\n", data);
+                free(data); // Освобождение памяти для извлеченных данных
+            }
+            break;
+        case 3:
+            review();
+            break;
+        case 4:
+            exit(0);
+        default:
+            printf("Некорректный ввод\n");
+            break;
+        }
+    }
+    return 0;
+}
