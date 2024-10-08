@@ -1,0 +1,118 @@
+#define _CRT_SECURE_NO_WARNINGS 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <iostream>
+#include <string.h>
+#include <locale.h>
+
+struct node {
+    char inf[256];
+    struct node* next;
+};
+
+struct node* top = NULL; // Указатель на вершину стека
+
+struct node* get_struct(void);
+void push(void);
+char* pop(void);
+void review(void);
+int is_empty(void);
+
+struct node* get_struct(void) {
+    struct node* p = NULL;
+
+    if ((p = (struct node*)malloc(sizeof(struct node))) == NULL) {
+        printf("Ошибка при распределении памяти\n");
+        exit(1);
+    }
+
+    printf("Введите название объекта: \n");
+    scanf("%s", p->inf);
+
+    p->next = NULL;
+    return p;
+}
+
+/* Добавление элемента в стек */
+void push(void) {
+    struct node* p = get_struct();
+
+    if (top == NULL) { // Если стек пуст
+        top = p; // Устанавливаем вершину на новый элемент
+    }
+    else {
+        p->next = top; // Новый элемент указывает на старую вершину
+        top = p; // Обновляем вершину стека
+    }
+}
+
+/* Извлечение элемента из стека */
+char* pop(void) {
+    if (top == NULL) { // Если стек пуст
+        printf("Стек пуст\n");
+        return NULL;
+    }
+
+    struct node* temp = top; // Сохраняем вершину для удаления
+    char* data = _strdup(temp->inf); // Копируем данные для возврата
+    top = top->next; // Обновляем вершину стека
+    free(temp); // Освобождаем память
+    return data; // Возвращаем данные
+}
+
+/* Просмотр содержимого стека */
+void review(void) {
+    struct node* struc = top;
+    if (top == NULL) {
+        printf("Стек пуст\n");
+        return;
+    }
+    while (struc) {
+        printf("Имя - %s\n", struc->inf);
+        struc = struc->next;
+    }
+}
+
+/* Проверка, пуст ли стек */
+int is_empty(void) {
+    return top == NULL;
+}
+
+/* Пример использования стека */
+int main() {
+    setlocale(LC_ALL, "Russian");
+    int choice;
+    char* data;
+
+    while (1) {
+        printf("1. Добавить элемент в стек\n");
+        printf("2. Извлечь элемент из стека\n");
+        printf("3. Просмотр стека\n");
+        printf("4. Выход\n");
+        printf("Выберите действие: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            push();
+            break;
+        case 2:
+            data = pop();
+            if (data) {
+                printf("Извлеченный элемент: %s\n", data);
+                free(data); // Освобождаем память для извлеченных данных
+            }
+            break;
+        case 3:
+            review();
+            break;
+        case 4:
+            exit(0);
+        default:
+            printf("Некорректный ввод\n");
+            break;
+        }
+    }
+    return 0;
+}
