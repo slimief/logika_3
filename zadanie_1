@@ -1,0 +1,156 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <iostream>
+#include <string.h>
+#include <locale.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Node {
+	int priority; // Приоритет элемента
+	char* data; // Данные элемента
+	struct Node* next; // Указатель на следующий элемент
+} Node;
+
+typedef struct PriorityQueue {
+	Node* head; // Указатель на голову списка
+} PriorityQueue;
+
+// Функция создания новой приоритетной очереди
+PriorityQueue* create_queue() {
+	PriorityQueue* pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
+	pq->head = NULL;
+	return pq;
+}
+
+// Функция добавления элемента в приоритетную очередь
+void enqueue(PriorityQueue* pq, const char* data, int priority) {
+	Node* new_node = (Node*)malloc(sizeof(Node));
+	new_node->priority = priority;
+	new_node->data = _strdup(data); // Копируем строку
+	new_node->next = NULL;
+
+	// Если очередь пуста либо приоритет нового элемента выше приоритета головы
+	if (pq->head == NULL || pq->head->priority < priority) {
+		new_node->next = pq->head;
+		pq->head = new_node;
+	}
+	else {
+		// Ищем место для вставки нового элемента
+		Node* current = pq->head;
+		while (current->next != NULL && current->next->priority >= priority) {
+			current = current->next;
+		}
+		new_node->next = current->next;
+		current->next = new_node;
+	}
+}
+
+// Функция извлечения элемента с наивысшим приоритетом
+char* dequeue(PriorityQueue* pq) {
+	if (pq->head == NULL) {
+		return NULL; // Очередь пуста
+	}
+	Node* temp = pq->head;
+	char* data = _strdup(temp->data); // Копируем данные
+	pq->head = pq->head->next;
+	free(temp->data); // Освобождаем память для данных
+	free(temp); // Освобождаем память для узла
+	return data; // Возвращаем данные
+}
+
+// Функция для просмотра очереди
+void review_queue(PriorityQueue* pq) {
+	Node* current = pq->head;
+	if (current == NULL) {
+		printf("Очередь пуста\n");
+		return;
+	}
+
+	printf("Содержимое очереди:\n");
+	while (current != NULL) {
+		printf("Имя - %s, Приоритет - %d\n", current->data, current->priority);
+		current = current->next;
+
+	}
+}
+
+// Функция проверки, пуста ли очередь
+int is_empty(PriorityQueue* pq) {
+	return pq->head == NULL;
+}
+
+// Функция освобождения памяти очереди
+void free_queue(PriorityQueue* pq) {
+	Node* current = pq->head;
+	Node* next_node;
+	while (current != NULL) {
+		next_node = current->next;
+		free(current->data); // Освобождаем память для данных
+		free(current);
+		current = next_node;
+	}
+	free(pq);
+}
+
+// Функция для ввода новой задачи
+void enter_task(PriorityQueue* pq) {
+	char data[256]; // Массив для хранения названия задачи
+	int priority;
+
+	printf("Введите задачу: ");
+	getchar(); // Сбрасываем символ новой строки после scanf
+	fgets(data, sizeof(data), stdin);
+	data[strcspn(data, "\n")] = '\0'; // Удаляем символ новой строки, если он есть
+	printf("Введите приоритет (число): ");
+	scanf("%d", &priority);
+
+	enqueue(pq, data, priority);
+}
+
+// Пример использования
+int main() {
+	setlocale(LC_ALL, "Russian");
+	PriorityQueue* pq = create_queue();
+	int choice;
+
+	while (1) {
+		printf("\nПожалуйста, выберите действие:\n");
+		printf("1. Добавить задачу\n");
+		printf("2. Извлечь задачу с наивысшим приоритетом \n");
+		printf("3. Просмотр очереди \n");
+		printf("4. Выход\n");
+		printf("Ваш выбор: ");
+		scanf("%d", &choice);
+
+		switch (choice) {
+		case 1:
+			enter_task(pq);
+			break;
+		case 2:
+		{
+			char* task = dequeue(pq);
+			if (task) {
+				printf("Обработка задачи: %s\n", task);
+				free(task); // Освобождение памяти для задач
+			}
+			else {
+				printf("Очередь пуста.\n");
+			}
+		}
+		break;
+		case 3:
+			review_queue(pq);
+			break;
+		case 4:
+			exit(0);
+		default:
+			printf("Неверный выбор. Попробуйте снова.\n");
+		}
+	}
+	free_queue(pq); // Освобождаем память для очереди
+	return 0;   }
